@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE index SYSTEM "roles.dtd">
+<index>
+    <entry word="sleep">
+        <occurence document="42"/>
+    </entry>
+    <entry word="awake">
+        <occurence document="23"/>
+    </entry>
+</index>

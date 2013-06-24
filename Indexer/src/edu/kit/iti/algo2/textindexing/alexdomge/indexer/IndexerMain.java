@@ -58,6 +58,7 @@ public class IndexerMain {
 		System.out.println("Done.");
 		System.out.println("Write output to " + out);
 		index.saveXML(out);
+		index.saveZippedXML(out);
 	}
 
 	private static List<File> validateInputFiles(List<String> in) {

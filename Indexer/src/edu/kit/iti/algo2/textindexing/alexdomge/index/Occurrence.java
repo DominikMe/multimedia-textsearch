@@ -1,8 +1,9 @@
 package edu.kit.iti.algo2.textindexing.alexdomge.index;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 
-class Occurrence implements Comparable<Occurrence> {
+class Occurrence implements Comparable<Occurrence>, Serializable {
 	final int docID;
 	int count = 1;
 

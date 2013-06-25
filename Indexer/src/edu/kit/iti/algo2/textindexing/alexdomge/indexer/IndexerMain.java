@@ -2,6 +2,7 @@ package edu.kit.iti.algo2.textindexing.alexdomge.indexer;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ public class IndexerMain {
 
 	private static final String FILE_ENDING = ".trscrpt";
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		IndexBuilder builder = new IndexBuilder();
 
 		List<String> fileNames = new ArrayList<String>();
@@ -58,6 +59,7 @@ public class IndexerMain {
 		System.out.println("Done.");
 		System.out.println("Write output to " + out);
 		index.saveXML(out);
+		index.saveDump(new File(out + ".dump"));
 		index.saveZippedXML(out);
 	}
 

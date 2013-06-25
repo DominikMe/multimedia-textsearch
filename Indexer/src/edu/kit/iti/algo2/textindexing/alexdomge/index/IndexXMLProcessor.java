@@ -32,7 +32,6 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-
 class IndexXMLProcessor {
 
 	private static final String COUNT = "count";
@@ -76,26 +75,14 @@ class IndexXMLProcessor {
 		try {
 			zip = new ZipInputStream(new FileInputStream(filename));
 			zip.getNextEntry();
-			parser = XMLInputFactory.newInstance().createXMLStreamReader(
-					zip);
+			parser = XMLInputFactory.newInstance().createXMLStreamReader(zip);
 			index = buildIndexFromXML(parser);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (XMLStreamException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} catch (XMLStreamException | FactoryConfigurationError | IOException e) {
 			e.printStackTrace();
 		} finally {
 			try {
 				parser.close();
 			} catch (XMLStreamException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -113,11 +100,14 @@ class IndexXMLProcessor {
 			}
 			String name = parser.getLocalName();
 			String word;
-			if (name.equals(ENTRY)) {
+
+			switch (name) {
+			case ENTRY:
 				word = parser.getAttributeValue(null, WORD);
 				list = new ArrayList<Occurrence>();
 				index.put(word, list);
-			} else if (name.equals(OCCURRENCE)) {
+				break;
+			case OCCURRENCE:
 				int docID = Integer.parseInt(parser.getAttributeValue(null,
 						DOCUMENT));
 				int count = Integer.parseInt(parser.getAttributeValue(null,
@@ -131,8 +121,7 @@ class IndexXMLProcessor {
 		return index;
 	}
 
-	static void writeFile(String filename,
-			Map<String, List<Occurrence>> index) {
+	static void writeFile(String filename, Map<String, List<Occurrence>> index) {
 
 		try {
 			Document dom = buildDOM(index);
@@ -141,27 +130,18 @@ class IndexXMLProcessor {
 			transf.transform(new DOMSource(dom), new StreamResult(
 					new FileOutputStream(filename)));
 
-		} catch (TransformerConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
+		} catch (TransformerFactoryConfigurationError | FileNotFoundException
+				| TransformerException e) {
 			e.printStackTrace();
 		}
 	}
 
 	static void writeZipArchive(String filename,
 			Map<String, List<Occurrence>> index) {
-
+		Document dom = buildDOM(index);
+		Transformer transf;
 		try {
-			Document dom = buildDOM(index);
-			Transformer transf = buildTransformer();
+			transf = buildTransformer();
 			ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(
 					filename + ".zip"));
 			ZipEntry entry = new ZipEntry(filename);
@@ -170,21 +150,8 @@ class IndexXMLProcessor {
 			transf.transform(new DOMSource(dom), new StreamResult(zip));
 			zip.closeEntry();
 			zip.close();
-
-		} catch (TransformerConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} catch (TransformerFactoryConfigurationError | TransformerException
+				| IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -192,14 +159,13 @@ class IndexXMLProcessor {
 	private static Transformer buildTransformer()
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError {
-		Transformer transf = TransformerFactory.newInstance()
-				.newTransformer();
+		Transformer transf = TransformerFactory.newInstance().newTransformer();
 		transf.setOutputProperty(OutputKeys.INDENT, "yes");
 		transf.setOutputProperty(OutputKeys.METHOD, "xml");
 		transf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 		transf.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "roles.dtd");
-		transf.setOutputProperty(
-				"{http://xml.apache.org/xslt}indent-amount", "4");
+		transf.setOutputProperty("{http://xml.apache.org/xslt}indent-amount",
+				"4");
 		return transf;
 	}
 
@@ -209,8 +175,7 @@ class IndexXMLProcessor {
 			dom = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 					.newDocument();
 			Element root = dom.createElement(INDEX);
-			for (Entry<String, List<Occurrence>> wordEntry : index
-					.entrySet()) {
+			for (Entry<String, List<Occurrence>> wordEntry : index.entrySet()) {
 				Element wordNode = dom.createElement(ENTRY);
 				wordNode.setAttribute(WORD, wordEntry.getKey());
 				for (Occurrence occ : wordEntry.getValue()) {
@@ -223,7 +188,6 @@ class IndexXMLProcessor {
 			}
 			dom.appendChild(root);
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return dom;

@@ -1,16 +1,25 @@
 package edu.kit.iti.algo2.textindexing.alexdomge.index;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
-public class InvertedIndex implements Searchable {
+public class InvertedIndex implements Searchable, Serializable {
 	private Map<String, List<Occurrence>> index;
 
 	public InvertedIndex() {
@@ -51,6 +60,22 @@ public class InvertedIndex implements Searchable {
 
 	public void loadZippedXML(String filename) {
 		index = IndexXMLProcessor.readZipArchive(filename);
+	}
+
+	public static InvertedIndex fromDump(File file)
+			throws FileNotFoundException, IOException, ClassNotFoundException {
+		ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(
+				new FileInputStream(file)));
+		Object obj = ois.readObject();
+		ois.close();
+		return (InvertedIndex) obj;
+	}
+
+	public void saveDump(File file) throws IOException {
+		ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(
+				new FileOutputStream(file)));
+		oos.writeObject(this);
+		oos.close();
 	}
 
 	@Override

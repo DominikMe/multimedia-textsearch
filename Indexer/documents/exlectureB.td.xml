@@ -1,0 +1,23 @@
+<timed-document file="test.mp3">
+	<slot time="0">
+
+	</slot>
+	<slot time="0">
+		1
+	</slot>
+	<slot time="8">
+		2
+	</slot>
+	<slot time="16">
+		3
+	</slot>
+	<slot time="24">
+		4
+	</slot>
+	<slot time="32">
+		5
+	</slot>
+	<slot time="40">
+		6
+	</slot>
+</timed-document>

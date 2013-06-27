@@ -19,7 +19,10 @@ import java.util.NoSuchElementException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public class InvertedIndex implements Searchable, Serializable {
+import edu.kit.iti.algo2.textindexing.IIndex;
+import edu.kit.iti.algo2.textindexing.searchengine.SearchResult;
+
+public class InvertedIndex implements Searchable, Serializable, IIndex {
 	private Map<String, List<Occurrence>> index;
 
 	public InvertedIndex() {
@@ -37,13 +40,27 @@ public class InvertedIndex implements Searchable, Serializable {
 		List<Occurrence> list = index.get(word);
 		if (!list.isEmpty()) {
 			Occurrence occ = list.get(list.size() - 1);
-			if (occ.docID == docID) {
-				occ.count++;
+			if (occ.getDocID() == docID) {
+				occ.setCount(occ.getCount() + 1);
 				return;
 			}
 		}
 		Occurrence occ = new Occurrence(docID);
 		index.get(word).add(occ);
+	}
+
+	@Override
+	public SearchResult lookup(String word) {
+		List<Occurrence> list = index.get(word);
+
+		SearchResult sr = new SearchResult();
+		if (list.isEmpty())
+			return sr;
+		
+		for (Occurrence occurrence : list) {
+			sr.add(occurrence);
+		}
+		return sr;
 	}
 
 	public void saveXML(String filename) {
@@ -150,4 +167,5 @@ public class InvertedIndex implements Searchable, Serializable {
 		r.close();
 		return;
 	}
+
 }

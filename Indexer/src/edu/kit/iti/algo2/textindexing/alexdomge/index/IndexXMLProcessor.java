@@ -113,7 +113,7 @@ class IndexXMLProcessor {
 				int count = Integer.parseInt(parser.getAttributeValue(null,
 						COUNT));
 				Occurrence occ = new Occurrence(docID);
-				occ.count = count;
+				occ.setCount(count);
 				list.add(occ);
 			}
 			parser.next();
@@ -180,8 +180,8 @@ class IndexXMLProcessor {
 				wordNode.setAttribute(WORD, wordEntry.getKey());
 				for (Occurrence occ : wordEntry.getValue()) {
 					Element occurenceNode = dom.createElement(OCCURRENCE);
-					occurenceNode.setAttribute(DOCUMENT, "" + occ.docID);
-					occurenceNode.setAttribute(COUNT, "" + occ.count);
+					occurenceNode.setAttribute(DOCUMENT, "" + occ.getDocID());
+					occurenceNode.setAttribute(COUNT, "" + occ.getCount());
 					wordNode.appendChild(occurenceNode);
 				}
 				root.appendChild(wordNode);

@@ -4,8 +4,10 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 
 public class Occurrence implements Comparable<Occurrence>, Serializable {
-	final int docID;
-	int count = 1;
+	private static final long serialVersionUID = -5290073216052377404L;
+
+	private final int docID;
+	private int count = 1;
 
 	public Occurrence(int docID) {
 		this.docID = docID;
@@ -36,10 +38,18 @@ public class Occurrence implements Comparable<Occurrence>, Serializable {
 
 	@Override
 	public int compareTo(Occurrence o) {
-		if (docID < o.docID)
-			return -1;
-		if (docID > o.docID)
-			return 1;
-		return 0;
+		return Integer.compare(docID, o.getDocID());
+	}
+
+	public int getDocID() {
+		return docID;
+	}
+
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
 	}
 }

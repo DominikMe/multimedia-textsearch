@@ -1,4 +1,4 @@
-package edu.kit.iti.algo2.textindexing;
+package edu.kit.iti.algo2.textindexing.util;
 
 /*
 
@@ -34,7 +34,9 @@ package edu.kit.iti.algo2.textindexing;
 
  */
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * Stemmer, implementing the Porter Stemming Algorithm
@@ -622,6 +624,7 @@ class Stemmer {
 							break;
 						System.out.print((char) ch);
 					}
+					in.close();
 				} catch (IOException e) {
 					System.out.println("error reading " + args[i]);
 					break;

@@ -37,4 +37,8 @@ public class MultiExpr implements Expr {
 	public Collection<Expr> child() {
 		return Collections.unmodifiableCollection(subexpr);
 	}
+
+	public List<Expr> getSubExpr() {
+		return subexpr;
+	}
 }

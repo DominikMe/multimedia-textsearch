@@ -10,17 +10,18 @@ import java.util.LinkedList;
 import java.util.List;
 
 import edu.kit.iti.algo2.textindexing.alexdomge.index.InvertedIndex;
+import edu.kit.iti.algo2.textindexing.alexdomge.index.Occurrence;
 
 public class IndexBuilder {
 
 	private InvertedIndex index;
 	private List<File> docs;
-	private int lastID;
+	private Occurrence lastID;
 
 	public IndexBuilder() {
 		index = new InvertedIndex();
 		docs = new LinkedList<File>();
-		lastID = 1;
+		lastID = Occurrence.create();
 	}
 
 	public void addDocuments(File... files) {
@@ -39,7 +40,7 @@ public class IndexBuilder {
 	private void expandIndex(File... files) {
 		for (File f : files) {
 			processDoc(f);
-			lastID++;
+			lastID = Occurrence.create();
 		}
 	}
 

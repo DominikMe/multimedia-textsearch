@@ -5,11 +5,14 @@ import java.util.List;
 
 import org.jdom2.Element;
 
+import edu.kit.iti.algo2.textindexing.util.TokenTool;
+
 public class TimeSlot {
 	private List<String> content;
 	private int startTime;
 
 	private int endTime;
+	private TimedDocument timedDocument;
 
 	public static TimeSlot fromXmlElement(Element slotE) {
 		TimeSlot ts = new TimeSlot();
@@ -84,5 +87,9 @@ public class TimeSlot {
 
 	public void setEndTime(int endTime) {
 		this.endTime = endTime;
+	}
+
+	public TimedDocument getTimedDocument() {
+		return timedDocument;
 	}
 }

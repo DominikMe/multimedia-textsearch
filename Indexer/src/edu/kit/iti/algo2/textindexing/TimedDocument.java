@@ -1,17 +1,18 @@
 package edu.kit.iti.algo2.textindexing;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
-
 
 /**
  * A {@link TimedDocument} describes a document with time associated content,
@@ -23,9 +24,10 @@ import org.jdom2.input.SAXBuilder;
 public class TimedDocument {
 	private Set<TimeSlot> timeSlots = new TreeSet<>();
 	private String multimediaFile;
+	private String uuid;
 
 	public TimedDocument() {
-
+		setUuid(UUID.randomUUID().toString());
 	}
 
 	public TimedDocument merge(TimedDocument other) {
@@ -60,14 +62,15 @@ public class TimedDocument {
 		return td;
 	}
 
-	public static TimedDocument readFromFile(String xml) throws JDOMException,
+	public static TimedDocument readFromFile(File file) throws JDOMException,
 			IOException {
 		SAXBuilder builder = new SAXBuilder();
-		Document document = (Document) builder.build(xml);
+		Document document = (Document) builder.build(file);
 		Element root = document.getRootElement();
 
 		TimedDocument td = new TimedDocument();
 		td.setMultimediaFile(root.getAttributeValue("file"));
+		td.setUuid(root.getAttributeValue("uuid"));
 
 		for (Element slotE : root.getChildren()) {
 			td.add(TimeSlot.fromXmlElement(slotE));
@@ -110,6 +113,18 @@ public class TimedDocument {
 
 	public void setMultimediaFile(String multimediaFile) {
 		this.multimediaFile = multimediaFile;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	public Set<TimeSlot> getTimeSlots() {
+		return timeSlots;
 	}
 
 }

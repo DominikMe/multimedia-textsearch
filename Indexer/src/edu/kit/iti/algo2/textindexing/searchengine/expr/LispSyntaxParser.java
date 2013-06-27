@@ -88,11 +88,4 @@ public class LispSyntaxParser {
 		return b;
 	}
 
-	public static void main(String[] args) {
-		String query1 = "(and 'abc' 'def' 'ghi')";
-		String query2 = "(or 'abc' 'def' (and 'ghi' 'ijk'))";
-		
-		System.out.println(new LispSyntaxParser(query1).parse());
-		System.out.println(new LispSyntaxParser(query2).parse());
-	}
 }

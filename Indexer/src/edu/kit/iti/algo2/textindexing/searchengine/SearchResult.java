@@ -12,10 +12,14 @@ import edu.kit.iti.algo2.textindexing.alexdomge.index.Occurrence;
  * 
  */
 public class SearchResult {
-	public Set<Occurrence> result = new TreeSet<>(new DocIdComparator());
+	public Set<SearchResultEntry> result = new TreeSet<>();
 
 	public void add(Occurrence occurrence) {
-		result.add(occurrence);
+		result.add(new SearchResultEntry(occurrence));
+	}
+
+	public void add(SearchResultEntry sre) {
+		result.add(sre);
 	}
 
 	public SearchResult intersect(SearchResult other) {
@@ -24,19 +28,18 @@ public class SearchResult {
 		if (result.size() == 0 || other.result.size() == 0)
 			return new SearchResult();
 
-		Iterator<Occurrence> a = other.result.iterator();
-		Iterator<Occurrence> b = result.iterator();
+		Iterator<SearchResultEntry> a = other.result.iterator();
+		Iterator<SearchResultEntry> b = result.iterator();
 
-		Occurrence currentA = a.next();
-		Occurrence currentB = b.next();
-
-		DocIdComparator comp = new DocIdComparator();
+		SearchResultEntry currentA = a.next();
+		SearchResultEntry currentB = b.next();
 
 		do {
-			int c = comp.compare(currentA, currentB);
+			int c = currentA.compareTo(currentB);
 			if (c == 0) {
-				Occurrence o = new Occurrence(currentA.getDocID());
-				o.setCount(currentA.getCount() + currentB.getCount());
+				Occurrence o = new Occurrence(currentA.getOccurrence());
+				o.setCount(currentA.getOccurrence().getCount()
+						+ currentB.getOccurrence().getCount());
 				sr.add(o);
 
 				if (!a.hasNext() && !b.hasNext())
@@ -72,4 +75,9 @@ public class SearchResult {
 		sr.result.addAll(other.result);
 		return sr;
 	}
+
+	public int size() {
+		return 0;
+	}
+
 }

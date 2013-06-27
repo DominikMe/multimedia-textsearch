@@ -1,14 +1,5 @@
 package edu.kit.iti.algo2.textindexing.alexdomge.index;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,37 +7,35 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import edu.kit.iti.algo2.textindexing.IIndex;
 import edu.kit.iti.algo2.textindexing.searchengine.SearchResult;
 
 public class InvertedIndex implements Searchable, Serializable, IIndex {
+	private static final long serialVersionUID = 2523937211988280815L;
 	private Map<String, List<Occurrence>> index;
 
 	public InvertedIndex() {
 		index = new HashMap<String, List<Occurrence>>();
 	}
 
-	public void put(String word, int docID) {
+	public void put(String word, Occurrence docID) {
 		if (index.get(word) == null) {
 			index.put(word, new ArrayList<Occurrence>());
 		}
 		updateOrInsertOccurence(word, docID);
 	}
 
-	private void updateOrInsertOccurence(String word, int docID) {
+	private void updateOrInsertOccurence(String word, Occurrence occ) {
 		List<Occurrence> list = index.get(word);
-		if (!list.isEmpty()) {
-			Occurrence occ = list.get(list.size() - 1);
-			if (occ.getDocID() == docID) {
-				occ.setCount(occ.getCount() + 1);
-				return;
-			}
+		if (list.contains(occ)) {
+			int pos = list.indexOf(occ);
+			Occurrence o = list.get(pos);
+			o.count++;
+		} else {
+			occ.count = 1;
+			index.get(word).add(occ);
 		}
-		Occurrence occ = new Occurrence(docID);
-		index.get(word).add(occ);
 	}
 
 	@Override
@@ -56,43 +45,11 @@ public class InvertedIndex implements Searchable, Serializable, IIndex {
 		SearchResult sr = new SearchResult();
 		if (list.isEmpty())
 			return sr;
-		
+
 		for (Occurrence occurrence : list) {
 			sr.add(occurrence);
 		}
 		return sr;
-	}
-
-	public void saveXML(String filename) {
-		IndexXMLProcessor.writeFile(filename, index);
-	}
-
-	public void saveZippedXML(String filename) {
-		IndexXMLProcessor.writeZipArchive(filename, index);
-	}
-
-	public void loadXML(String filename) {
-		index = IndexXMLProcessor.readFile(filename);
-	}
-
-	public void loadZippedXML(String filename) {
-		index = IndexXMLProcessor.readZipArchive(filename);
-	}
-
-	public static InvertedIndex fromDump(File file)
-			throws FileNotFoundException, IOException, ClassNotFoundException {
-		ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(
-				new FileInputStream(file)));
-		Object obj = ois.readObject();
-		ois.close();
-		return (InvertedIndex) obj;
-	}
-
-	public void saveDump(File file) throws IOException {
-		ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(
-				new FileOutputStream(file)));
-		oos.writeObject(this);
-		oos.close();
 	}
 
 	@Override
@@ -145,27 +102,12 @@ public class InvertedIndex implements Searchable, Serializable, IIndex {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
-		InvertedIndex inv = new InvertedIndex();
-		inv.loadZippedXML("built_indexes/index.xml.zip");
-		BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
-		System.out
-				.println("Type search terms divided by spaces: (:q for exit)");
-		String line = "";
-		while (!line.equals(":q")) {
-			line = r.readLine();
-			// List<Occurrence> result = inv
-			// .searchConjunctively("perplexity", "house", "rabble");
-			List<Occurrence> result = inv.searchConjunctively(line.split(" "));
-			if (result.isEmpty())
-				System.out.println("No document matches all keywords.");
-			for (Occurrence occ : result) {
-				System.out.println(occ);
-			}
-			System.out.println();
-		}
-		r.close();
-		return;
+	Map<String, List<Occurrence>> getInternal() {
+		return index;
+	}
+
+	public void setInternal(Map<String, List<Occurrence>> internal) {
+		index = internal;
 	}
 
 }

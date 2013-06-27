@@ -1,14 +1,16 @@
 package edu.kit.iti.algo2.textindexing.alexdomge.index;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -40,17 +42,15 @@ class IndexXMLProcessor {
 	private static final String WORD = "word";
 	private static final String ENTRY = "entry";
 	private static final String INDEX = "index";
+	private static final String TIMESLOT = "ts";
 
-	static Map<String, List<Occurrence>> readFile(String filename) {
+	static Map<String, List<Occurrence>> read(InputStream stream) {
 		Map<String, List<Occurrence>> index = null;
 		XMLStreamReader parser = null;
 		try {
-			parser = XMLInputFactory.newInstance().createXMLStreamReader(
-					new FileInputStream(filename));
+			parser = XMLInputFactory.newInstance()
+					.createXMLStreamReader(stream);
 			index = buildIndexFromXML(parser);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (XMLStreamException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -98,6 +98,7 @@ class IndexXMLProcessor {
 				parser.next();
 				continue;
 			}
+
 			String name = parser.getLocalName();
 			String word;
 
@@ -108,11 +109,14 @@ class IndexXMLProcessor {
 				index.put(word, list);
 				break;
 			case OCCURRENCE:
-				int docID = Integer.parseInt(parser.getAttributeValue(null,
+				UUID docID = UUID.fromString(parser.getAttributeValue(null,
 						DOCUMENT));
+
+				int tsID = Integer.parseInt(parser.getAttributeValue(null,
+						TIMESLOT));
 				int count = Integer.parseInt(parser.getAttributeValue(null,
 						COUNT));
-				Occurrence occ = new Occurrence(docID);
+				Occurrence occ = new Occurrence(docID, tsID);
 				occ.setCount(count);
 				list.add(occ);
 			}
@@ -121,17 +125,16 @@ class IndexXMLProcessor {
 		return index;
 	}
 
-	static void writeFile(String filename, Map<String, List<Occurrence>> index) {
+	static void writeFile(OutputStream stream,
+			Map<String, List<Occurrence>> index2) {
 
 		try {
-			Document dom = buildDOM(index);
+			Document dom = buildDOM(index2);
 			Transformer transf = buildTransformer();
 
-			transf.transform(new DOMSource(dom), new StreamResult(
-					new FileOutputStream(filename)));
+			transf.transform(new DOMSource(dom), new StreamResult(stream));
 
-		} catch (TransformerFactoryConfigurationError | FileNotFoundException
-				| TransformerException e) {
+		} catch (TransformerFactoryConfigurationError | TransformerException e) {
 			e.printStackTrace();
 		}
 	}
@@ -181,6 +184,8 @@ class IndexXMLProcessor {
 				for (Occurrence occ : wordEntry.getValue()) {
 					Element occurenceNode = dom.createElement(OCCURRENCE);
 					occurenceNode.setAttribute(DOCUMENT, "" + occ.getDocID());
+					occurenceNode
+							.setAttribute(TIMESLOT, "" + occ.getTimeSlot());
 					occurenceNode.setAttribute(COUNT, "" + occ.getCount());
 					wordNode.appendChild(occurenceNode);
 				}

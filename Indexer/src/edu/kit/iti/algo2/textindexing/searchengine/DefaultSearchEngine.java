@@ -6,10 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.sun.org.apache.xpath.internal.operations.And;
-
 import edu.kit.iti.algo2.textindexing.IIndex;
-import edu.kit.iti.algo2.textindexing.gui.SearchResultModel;
 import edu.kit.iti.algo2.textindexing.searchengine.expr.Expr;
 import edu.kit.iti.algo2.textindexing.searchengine.expr.MultiExpr;
 import edu.kit.iti.algo2.textindexing.searchengine.expr.StrictWordExpr;

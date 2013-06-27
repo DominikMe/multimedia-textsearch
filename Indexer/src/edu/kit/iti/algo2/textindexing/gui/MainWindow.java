@@ -4,12 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.io.FileNotFoundException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -19,28 +19,30 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import edu.kit.iti.algo2.textindexing.alexdomge.index.InvertedIndex;
-import edu.kit.iti.algo2.textindexing.alexdomge.index.Occurrence;
+import edu.kit.iti.algo2.textindexing.alexdomge.index.InvertedIndexPickle;
 import edu.kit.iti.algo2.textindexing.searchengine.DefaultSearchEngine;
 import edu.kit.iti.algo2.textindexing.searchengine.SearchEngine;
 import edu.kit.iti.algo2.textindexing.searchengine.SearchResult;
+import edu.kit.iti.algo2.textindexing.searchengine.SearchResultEntry;
 import edu.kit.iti.algo2.textindexing.searchengine.expr.Expr;
 import edu.kit.iti.algo2.textindexing.searchengine.expr.LispSyntaxParser;
 
 public class MainWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JTextField txtSearch;
-	private JList<Occurrence> resultList = new JList<>();
+	private JList<SearchResultEntry> resultList = new JList<>();
 	private JLabel lblStatus = new JLabel("Loading ...");
 	private SearchEngine searchEngine;
 	private SearchResultModel resultModel = new SearchResultModel();
 	private AbstractAction actSearch = new SearchAction();
 
-	public MainWindow() {
+	public MainWindow() throws FileNotFoundException {
 		buildFrame();
 		setSize(500, 500);
 		InvertedIndex ii = new InvertedIndex();
-		ii.loadXML("test.xml");
+		ii = InvertedIndexPickle.loadFromXml("test");
 		searchEngine = new DefaultSearchEngine(ii);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		status("text.xml loaded");
 	}
 
@@ -49,11 +51,12 @@ public class MainWindow extends JFrame {
 	}
 
 	private void buildFrame() {
+		resultList.setCellRenderer(new SearchResultEntryRenderer());
+
 		setLayout(new BorderLayout());
 		add(northPanel(), BorderLayout.NORTH);
 		add(centralPanel());
 		add(statusPanel(), BorderLayout.SOUTH);
-
 	}
 
 	private Component statusPanel() {
@@ -79,10 +82,6 @@ public class MainWindow extends JFrame {
 	private Component centralPanel() {
 		JScrollPane jsp = new JScrollPane(resultList);
 		return jsp;
-	}
-
-	public static void main(String[] args) {
-		new MainWindow().setVisible(true);
 	}
 
 	class SearchAction extends AbstractAction {

@@ -11,16 +11,15 @@ import edu.kit.iti.algo2.textindexing.TimedDocument;
 import edu.kit.iti.algo2.textindexing.alexdomge.index.InvertedIndex;
 import edu.kit.iti.algo2.textindexing.alexdomge.index.InvertedIndexPickle;
 import edu.kit.iti.algo2.textindexing.alexdomge.indexer.DocumentRepository;
-import edu.kit.iti.algo2.textindexing.alexdomge.indexer.LanguageSpecific;
 import edu.kit.iti.algo2.textindexing.alexdomge.indexer.TimedDocumentIndexBuilder;
+import edu.kit.iti.algo2.textindexing.alexdomge.indexer.lang.EnglishSpecific;
 
 public class TimedDocumentIndexerMain {
-
 	private static final String FILE_ENDING = ".td.xml";
 
 	public static void main(String[] args) throws IOException {
 		TimedDocumentIndexBuilder indexer = new TimedDocumentIndexBuilder(
-				new LanguageSpecific.EnglishSpecific());
+				new EnglishSpecific());
 
 		List<String> fileNames = new ArrayList<String>();
 

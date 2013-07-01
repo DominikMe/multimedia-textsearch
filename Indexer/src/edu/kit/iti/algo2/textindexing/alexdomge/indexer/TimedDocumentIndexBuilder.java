@@ -8,6 +8,7 @@ import edu.kit.iti.algo2.textindexing.TimeSlot;
 import edu.kit.iti.algo2.textindexing.TimedDocument;
 import edu.kit.iti.algo2.textindexing.alexdomge.index.InvertedIndex;
 import edu.kit.iti.algo2.textindexing.alexdomge.index.Occurrence;
+import edu.kit.iti.algo2.textindexing.alexdomge.indexer.lang.LanguageSpecific;
 
 public class TimedDocumentIndexBuilder {
 	private InvertedIndex index;
@@ -42,7 +43,7 @@ public class TimedDocumentIndexBuilder {
 	}
 
 	private void process(TimedDocument td, TimeSlot ts) {
-		Collection<String> content = lang.tokenizeAndClean(ts.getContent());
+		Collection<String> content = lang.clean(ts.getContent());
 		Occurrence occ = new Occurrence(td.getUuid(), ts.getStartTime());
 		for (String s : content) {
 			getIndex().put(s, occ);

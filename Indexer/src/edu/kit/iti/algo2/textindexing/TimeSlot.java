@@ -1,5 +1,6 @@
 package edu.kit.iti.algo2.textindexing;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -8,7 +9,7 @@ import org.jdom2.Element;
 import edu.kit.iti.algo2.textindexing.util.TokenTool;
 
 public class TimeSlot {
-	private List<String> content;
+	private Collection<String> content;
 	private int startTime;
 
 	private int endTime;
@@ -51,12 +52,12 @@ public class TimeSlot {
 		this.startTime = startTime;
 	}
 
-	public List<String> getContent() {
+	public Collection<String> getContent() {
 		return content;
 	}
 
-	public void setContent(List<String> content) {
-		this.content = content;
+	public void setContent(Collection<String> collection) {
+		this.content = collection;
 	}
 
 	@Override

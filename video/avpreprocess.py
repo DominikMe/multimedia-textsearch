@@ -6,6 +6,9 @@ import os
 import tempfile
 import errno
 import argparse
+import urllib2
+import json
+
 from string import Template
 from multiprocessing import Pool
 import lxml.etree as ET
@@ -20,7 +23,7 @@ clilogger = logging.getLogger('cli')
 clilogger.debug("cli logger is init")
 
 COMMAND_EXTRACT_AUDIO = Template(
-    "ffmpeg -i ${src} -vn -ar 44100 -ac 2 -ab 192 --ss ${start} -t ${duration} -f flac ${out}.flac")
+    "ffmpeg -i ${src} -vn -ar 16000 -ss ${start} -t ${duration} -f flac ${out}.flac")
 COMMAND_EXTRACT_VIDEO = Template("ffmpeg -y -i ${src} -r ${framerate}  -f image2 ${dir}/%07d.png")
 COMMAND_TESSERACT = Template("tesseract ${input} ${out} -l ${lang} -psm ${psm}")
 COMMAND_EXTRACT_DURATION = Template("ffmpeg -i ${src}")
@@ -38,12 +41,13 @@ def mkdir_p(path):
 
 def get_duration(input_file):
     s = COMMAND_EXTRACT_DURATION.substitute({'src': input_file})
-    cout,cin,cerr= os.popen3(s)
+    cout, cin, cerr = os.popen3(s)
 
     import re
+
     pattern = re.compile(r'Duration: (\d\d:\d\d:\d\d.\d\d)')
 
-
+    tim = None
     for line in cerr.readlines():
         line = line.strip()
         m = pattern.findall(line)
@@ -66,12 +70,14 @@ def extract_audio(input_video, target_folder, deltaT):
     pool = Pool(4)
 
     for t in range(0, length, deltaT):
-        p = {'src': input_video, 'out': t / deltaT, 'start': t, 'duration': deltaT}
+        p = {'src': input_video, 'out': target_folder+"/"+str(t / deltaT), 'start': t, 'duration': deltaT}
         s = COMMAND_EXTRACT_AUDIO.substitute(p)
-        clilogger.info("exec: %s in worker", s)
-        pool.apply_async(os.system, s)
+        os.system(s)
+        #clilogger.info("exec: %s in worker", s)
+        #pool.apply_async(os.system, s)
 
     pool.close()
+    #pool.join()
 
 
 def extract_video(input_video, target_folder, deltaT=5):
@@ -93,6 +99,15 @@ def gather_files(target_folder, filter="*.png", deltaT=5):
     return files
 
 
+def speech_to_text(audio_file):
+    fin = os.popen("java SpeechRec %s" % audio_file)
+    data = fin.read()
+    fin.close()
+    print data
+    jsdata = json.loads(data)
+    return jsdata["hypotheses"][0]["utterance"]
+
+
 def ocr_image(image, lang="deu", psm=1):
     out = tempfile.mktemp()
 
@@ -109,21 +124,22 @@ def ocr_image(image, lang="deu", psm=1):
 def ocr(doc):
     time, image = doc[0], doc[1]
     ndoc = ocr_image(image)
-    return (time, ndoc)
+    return time, ndoc
 
 
 def sr(doc):
     time, audio = doc[0], doc[1]
-    #ndoc = speechrec(image)
-    return (time, "")
+    ndoc = speech_to_text(audio)
+    return time, ndoc
 
 
-def print_timed_document(input_file, docs):
-    root = ET.Element("timed-document", file = input_file)
-    for time,content in docs:
-        slot = ET.SubElement(root, 'slot', start = time, end = time + deltaT)
+def print_timed_document(input_file, deltaT, docs):
+    root = ET.Element("timed-document", file=input_file)
+    for time, content in docs:
+        slot = ET.SubElement(root, 'slot', start=time, end=time + deltaT)
         slot.text = content
     print ET.tostring(root)
+
 
 def main(inputfile, video=True, audio=True,
          deltaT=60, audiodir=None, videodir=None):
@@ -135,10 +151,11 @@ def main(inputfile, video=True, audio=True,
 
     pool = Pool(4)
 
+    adocs = vdocs = []
     if audio:
         extract_audio(inputfile, newAudioDir, deltaT)
-        audios = gather_files(newAudioDir,  "*flac", deltaT)
-        adocs = pool.map(sr, audios)
+        audios = gather_files(newAudioDir, "*flac", deltaT)
+        adocs = map(sr, audios)
 
     if video:
         extract_video(inputfile, newPictureDir, deltaT)
@@ -151,9 +168,9 @@ def main(inputfile, video=True, audio=True,
     print list(adocs), list(vdocs)
 
     docs = []
-    for (at,ac), (vt,vc) in zip(adocs,vdocs):
-        docs.append( (at,ac+vc)  )
-    print_timed_document(inputfile, docs)
+    for (at, ac), (vt, vc) in zip(adocs, vdocs):
+        docs.append((at, ac + vc))
+    print_timed_document(inputfile, deltaT, docs)
 
 
 def get_parser():
@@ -183,7 +200,7 @@ def get_parser():
 
 if __name__ == "__main__":
     p = get_parser()
-    args,input = p.parse_known_args()
+    args, input = p.parse_known_args()
 
     main(inputfile=args.input,
          video=not args.novideo,

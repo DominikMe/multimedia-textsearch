@@ -40,8 +40,8 @@ public class MainWindow extends JFrame {
 		buildFrame();
 		setSize(500, 500);
 		InvertedIndex ii = new InvertedIndex();
-		ii = InvertedIndexPickle.loadFromXml("test");
-		searchEngine = new DefaultSearchEngine(ii);
+//		ii = InvertedIndexPickle.loadFromXml("test");
+//		searchEngine = new DefaultSearchEngine(ii);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		status("text.xml loaded");
 	}

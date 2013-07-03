@@ -88,7 +88,6 @@ public class Recognizer {
 			
 			JSONObject json = (JSONObject)JSONValue.parse(response.toString());
 			for (Object hyp: (JSONArray)json.get("hypotheses")) {
-				System.out.println(((JSONObject)hyp).get("utterance"));
 				transcripts.add((String)((JSONObject)hyp).get("utterance"));
 			}
 			
@@ -100,6 +99,9 @@ public class Recognizer {
 	
 	public static void main(String[] args) {
 		Recognizer test = new Recognizer(48000);
-		test.speech2text("/home/easy0924/Workspace/multimedia-textsearch/google_demo/test2.flac");
+		for (String s:test.speech2text("/home/easy0924/Workspace/multimedia-textsearch/google_demo/test2.flac")) {
+			System.out.println("Hyp: ");
+			System.out.println(s);
+		}
 	}
 }

@@ -6,27 +6,60 @@ import os
 import tempfile
 import errno
 import argparse
-import urllib2
 import json
-
+import sys
 from string import Template
 from multiprocessing import Pool
+import subprocess
+
+
+import logging.config
 import lxml.etree as ET
+from colorlog import ColoredFormatter
 
 from path import path
 
 
-#simple logging
-FORMAT = '%(levelname)s\t: %(message)s'
-logging.basicConfig(format=FORMAT, level=logging.DEBUG)
-clilogger = logging.getLogger('cli')
-clilogger.debug("cli logger is init")
+def setup_logging():
+    formatter = ColoredFormatter(
+        "%(log_color)s%(levelname)-8s%(reset)s %(blue)s%(message)s",
+        datefmt=None,
+        reset=True,
+        log_colors={
+            'DEBUG': 'cyan',
+            'INFO': 'green',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'red',
+        }
+    )
+
+    c = logging.getLogger("console")
+    c.setLevel(logging.DEBUG)
+    clr = logging.StreamHandler(sys.stderr)
+    clr.setFormatter(formatter)
+    c.addHandler(clr)
+
+
+    #p = logging.getLogger("program")
+    #p.setLevel(logging.INFO)
+    #p.addHandler(logging.FileHandler("output.txt"))
+
+    return c,c
+
+console_logger, program_logger = setup_logging()
 
 COMMAND_EXTRACT_AUDIO = Template(
     "ffmpeg -i ${src} -vn -ar 16000 -ss ${start} -t ${duration} -f flac ${out}.flac")
 COMMAND_EXTRACT_VIDEO = Template("ffmpeg -y -i ${src} -r ${framerate}  -f image2 ${dir}/%07d.png")
 COMMAND_TESSERACT = Template("tesseract ${input} ${out} -l ${lang} -psm ${psm}")
 COMMAND_EXTRACT_DURATION = Template("ffmpeg -i ${src}")
+
+
+def execute_with_log(command):
+    console_logger.info("EXECUTE: %s", command)
+    with open("output.txt", "a") as out:
+        return subprocess.call(command, stdout=out, stderr=out, shell=True)
 
 
 def mkdir_p(path):
@@ -55,7 +88,7 @@ def get_duration(input_file):
         if m:
             t = m[0]
             tim = int(t[0:2]) * 60 * 60 + int(t[3:5]) * 60 + int(t[6:8])
-            clilogger.info("in seconds: %d", tim)
+            console_logger.info("in seconds: %d", tim)
             break
 
     cout.close()
@@ -70,10 +103,9 @@ def extract_audio(input_video, target_folder, deltaT):
     pool = Pool(4)
 
     for t in range(0, length, deltaT):
-        p = {'src': input_video, 'out': target_folder+"/"+str(t / deltaT), 'start': t, 'duration': deltaT}
+        p = {'src': input_video, 'out': target_folder + "/" + str(t / deltaT), 'start': t, 'duration': deltaT}
         s = COMMAND_EXTRACT_AUDIO.substitute(p)
-        os.system(s)
-        #clilogger.info("exec: %s in worker", s)
+        execute_with_log(s)
         #pool.apply_async(os.system, s)
 
     pool.close()
@@ -83,9 +115,8 @@ def extract_audio(input_video, target_folder, deltaT):
 def extract_video(input_video, target_folder, deltaT=5):
     cmd = COMMAND_EXTRACT_VIDEO.substitute(
         {'src': input_video, 'dir': target_folder, 'framerate': 1. / deltaT})
-    clilogger.info(cmd)
     mkdir_p(target_folder)
-    os.system(cmd)
+    execute_with_log(cmd)
 
 
 def gather_files(target_folder, filter="*.png", deltaT=5):
@@ -113,8 +144,8 @@ def ocr_image(image, lang="deu", psm=1):
 
     cmd = COMMAND_TESSERACT.substitute(
         {'input': image, 'out': out, 'lang': lang, 'psm': psm})
-    clilogger.info(cmd)
-    a = os.system(cmd)
+    console_logger.info(cmd)
+    a = execute_with_log(cmd)
     if a == 0:
         with open("%s.txt" % out) as f:
             return f.read()
@@ -133,21 +164,34 @@ def sr(doc):
     return time, ndoc
 
 
-def print_timed_document(input_file, deltaT, docs):
+def print_timed_document(input_file, deltaT, docs, dest = None):
+    def clean(s):
+        return filter(lambda c: 32 <= ord(c) <= 126, s)
+
     root = ET.Element("timed-document", file=input_file)
     for time, content in docs:
-        slot = ET.SubElement(root, 'slot', start=time, end=time + deltaT)
-        slot.text = content
-    print ET.tostring(root)
+        slot = ET.SubElement(root, 'slot', start=str(time), end=str(time + deltaT))
+        slot.text = clean(content)
+
+    xml = ET.tostring(root, pretty_print=True, standalone=True, encoding="utf-8")
+    if dest:
+        with open(dest,'w') as f:
+            f.write(xml)
+    else:
+        print xml
+
 
 
 def main(inputfile, video=True, audio=True,
-         deltaT=60, audiodir=None, videodir=None):
+         deltaT=60, audiodir=None, videodir=None, dest=None):
     newAudioDir = audiodir if audiodir else tempfile.mkdtemp()
     newPictureDir = videodir if videodir else tempfile.mkdtemp()
 
-    clilogger.info("use %s for pictures", newPictureDir)
-    clilogger.info("use %s for pictures", newAudioDir)
+    console_logger.info("use %s for pictures", newPictureDir)
+    console_logger.info("use %s for pictures", newAudioDir)
+
+
+    console_logger.info("VIDEO %s, AUDIO %s, DELTAT %s", video, audio, deltaT)
 
     pool = Pool(4)
 
@@ -164,13 +208,16 @@ def main(inputfile, video=True, audio=True,
 
     pool.close()
 
-    print type(adocs), type(vdocs)
-    print list(adocs), list(vdocs)
+    if audio and not video:
+        docs = adocs
+    elif video and not audio:
+        docs = vdocs
+    else:
+        docs = []
+        for (at, ac), (vt, vc) in zip(adocs, vdocs):
+            docs.append((at, ac + vc))
 
-    docs = []
-    for (at, ac), (vt, vc) in zip(adocs, vdocs):
-        docs.append((at, ac + vc))
-    print_timed_document(inputfile, deltaT, docs)
+    print_timed_document(inputfile, deltaT, docs , dest)
 
 
 def get_parser():
@@ -195,6 +242,8 @@ def get_parser():
 
     parser.add_argument('--delta', '-d', dest='deltaT', default=60, metavar="SECONDS",
                         help="period time (e.g. take a snapshot ever t seconds")
+
+    parser.add_argument("--output", "-o", dest="destination", default=None, metavar="FILE", help="")
     return parser
 
 
@@ -202,10 +251,12 @@ if __name__ == "__main__":
     p = get_parser()
     args, input = p.parse_known_args()
 
+
     main(inputfile=args.input,
          video=not args.novideo,
          audio=not args.noaudio,
          deltaT=int(args.deltaT),
          audiodir=args.tempDirAudio,
          videodir=args.tempDirVideo,
+         dest =args.destination
     )

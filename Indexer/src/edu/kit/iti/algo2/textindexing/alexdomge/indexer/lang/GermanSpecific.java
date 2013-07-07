@@ -1,23 +1,13 @@
 package edu.kit.iti.algo2.textindexing.alexdomge.indexer.lang;
 
-import java.util.Collection;
-
-import edu.kit.iti.algo2.textindexing.util.TokenTool;
 
 public class GermanSpecific extends LanguageSpecific {
 
-    @Override
-    public Collection<String> tokenizeAndClean(String content) {
-	return clean(tokenize(content));
-    }
-
-    @Override
-    public Collection<String> tokenize(String content) {
-	return TokenTool.tokenize(content);
-    }
-
-    @Override
-    public Collection<String> clean(Collection<String> content) {
-	return content;
+    public GermanSpecific() {
+	String sw = "aber als am an auch auf aus bei bin bis bist da dadurch daher darum das daß dass dein deine dem den der des dessen deshalb die dies dieser dieses doch dort du durch ein eine einem einen einer eines er es euer eure für hatte hatten hattest hattet hier  hinter ich ihr ihre im in ist ja jede jedem jeden jeder jedes jener jenes jetzt kann kannst können könnt machen mein meine mit muß mußt musst müssen müßt nach nachdem nein nicht nun oder seid sein seine sich sie sind soll sollen sollst sollt sonst soweit sowie und unser  unsere unter vom von vor wann warum was weiter weitere wenn wer werde werden werdet weshalb wie wieder wieso wir wird wirst wo woher wohin zu zum zur über";
+	sw = sw.replace('\t', ' ');
+	for (String s : sw.split(" ")) {
+	    stopwords.add(s);
+	}
     }
 }

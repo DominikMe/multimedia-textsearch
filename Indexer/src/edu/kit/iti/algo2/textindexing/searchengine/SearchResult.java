@@ -1,5 +1,6 @@
 package edu.kit.iti.algo2.textindexing.searchengine;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -12,72 +13,81 @@ import edu.kit.iti.algo2.textindexing.alexdomge.index.Occurrence;
  * 
  */
 public class SearchResult {
-	public Set<SearchResultEntry> result = new TreeSet<>();
+    public Set<SearchResultEntry> result = new TreeSet<>();
 
-	public void add(Occurrence occurrence) {
-		result.add(new SearchResultEntry(occurrence));
-	}
+    public void add(Occurrence occurrence, String... word) {
+	result.add(new SearchResultEntry(occurrence, word));
+    }
 
-	public void add(SearchResultEntry sre) {
-		result.add(sre);
-	}
+    public void add(SearchResultEntry sre) {
+	result.add(sre);
+    }
 
-	public SearchResult intersect(SearchResult other) {
-		SearchResult sr = new SearchResult();
+    public void add(Occurrence o, Set<String> mw) {
+	final SearchResultEntry sre = new SearchResultEntry(o);
+	sre.setMatchedWords(mw);
+	add(sre);
+    }
 
-		if (result.size() == 0 || other.result.size() == 0)
-			return new SearchResult();
+    public SearchResult intersect(SearchResult other) {
+	SearchResult sr = new SearchResult();
 
-		Iterator<SearchResultEntry> a = other.result.iterator();
-		Iterator<SearchResultEntry> b = result.iterator();
+	if (result.size() == 0 || other.result.size() == 0)
+	    return new SearchResult();
 
-		SearchResultEntry currentA = a.next();
-		SearchResultEntry currentB = b.next();
+	Iterator<SearchResultEntry> a = other.result.iterator();
+	Iterator<SearchResultEntry> b = result.iterator();
 
-		do {
-			int c = currentA.compareTo(currentB);
-			if (c == 0) {
-				Occurrence o = new Occurrence(currentA.getOccurrence());
-				o.setCount(currentA.getOccurrence().getCount()
-						+ currentB.getOccurrence().getCount());
-				sr.add(o);
+	SearchResultEntry currentA = a.next();
+	SearchResultEntry currentB = b.next();
 
-				if (!a.hasNext() && !b.hasNext())
-					break;
+	do {
+	    int c = currentA.compareTo(currentB);
+	    if (c == 0) {
+		Occurrence o = new Occurrence(currentA.getOccurrence());
+		o.setCount(currentA.getOccurrence().getCount()
+			+ currentB.getOccurrence().getCount());
+		Set<String> mw = new HashSet<>();
+		mw.addAll(currentA.getMatchedWords());
+		mw.addAll(currentB.getMatchedWords());
+		sr.add(o, mw);
 
-				currentA = a.next();
-				currentB = b.next();
-			}
+		if (!a.hasNext() && !b.hasNext())
+		    break;
 
-			if (c < 0) {
-				if (!a.hasNext())
-					break;
-				currentA = a.next();
-			}
+		currentA = a.next();
+		currentB = b.next();
+	    }
 
-			if (c > 0) {
-				if (!b.hasNext())
-					break;
-				currentB = b.next();
-			}
-		} while (true);
-		return sr;
-	}
+	    if (c < 0) {
+		if (!a.hasNext())
+		    break;
+		currentA = a.next();
+	    }
 
-	@Override
-	public String toString() {
-		return "SearchResult [result=" + result + "]";
-	}
+	    if (c > 0) {
+		if (!b.hasNext())
+		    break;
+		currentB = b.next();
+	    }
+	} while (true);
+	return sr;
+    }
 
-	public SearchResult union(SearchResult other) {
-		SearchResult sr = new SearchResult();
-		sr.result.addAll(result);
-		sr.result.addAll(other.result);
-		return sr;
-	}
+    @Override
+    public String toString() {
+	return "SearchResult [result=" + result + "]";
+    }
 
-	public int size() {
-		return 0;
-	}
+    public SearchResult union(SearchResult other) {
+	SearchResult sr = new SearchResult();
+	sr.result.addAll(result);
+	sr.result.addAll(other.result);
+	return sr;
+    }
+
+    public int size() {
+	return 0;
+    }
 
 }

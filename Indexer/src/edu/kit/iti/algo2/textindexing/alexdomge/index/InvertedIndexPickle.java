@@ -15,65 +15,104 @@ import edu.kit.iti.algo2.textindexing.alexdomge.indexer.Pickle;
 
 public class InvertedIndexPickle {
 
-	public static String SFX_XML_GZIP = ".xml.gz";
-	public static String SFX_XML = ".xml";
-	public static String SFX_ZIP = ".zip";
-	public static String SFX_DUMP = ".dump";
-	public static String SFX_DUMP_GZIP = ".dump.gzip";
+    public static final String SFX_XML_GZIP = ".xml.gzip";
+    public static final String SFX_XML = ".xml";
+    public static final String SFX_ZIP = ".zip";
+    public static final String SFX_DUMP = ".dump";
+    public static final String SFX_DUMP_GZIP = ".dump.gzip";
 
-	public static void storeToXml(String basename, InvertedIndex ii)
-			throws FileNotFoundException {
-		FileOutputStream fos = new FileOutputStream(basename + SFX_XML);
-		IndexXMLProcessor.writeFile(fos, ii.getInternal());
-	}
+    public static void storeToXml(String basename, InvertedIndex ii)
+	    throws FileNotFoundException {
+	FileOutputStream fos = new FileOutputStream(basename + SFX_XML);
+	IndexXMLProcessor.writeFile(fos, ii.getInternal());
+    }
 
-	public static InvertedIndex loadFromXml(String basename)
-			throws FileNotFoundException {
-		InvertedIndex ii = new InvertedIndex();
-		InputStream fis = new FileInputStream(basename + SFX_XML);
-		Map<String, List<Occurrence>> a = IndexXMLProcessor.read(fis);
-		ii.setInternal(a);
-		return ii;
-	}
+    public static InvertedIndex loadFromXml(String basename)
+	    throws FileNotFoundException {
+	InvertedIndex ii = new InvertedIndex();
+	InputStream fis = new FileInputStream(basename + SFX_XML);
+	Map<String, List<Occurrence>> a = IndexXMLProcessor.read(fis);
+	ii.setInternal(a);
+	return ii;
+    }
 
-	public static void storeToGZipXml(String basename, InvertedIndex ii)
-			throws FileNotFoundException, IOException {
-		GZIPOutputStream fos = new GZIPOutputStream(new FileOutputStream(
-				basename + SFX_XML));
-		IndexXMLProcessor.writeFile(fos, ii.getInternal());
-		fos.close();
-	}
+    public static void storeToGZipXml(String basename, InvertedIndex ii)
+	    throws FileNotFoundException, IOException {
+	GZIPOutputStream fos = new GZIPOutputStream(new FileOutputStream(
+		basename + SFX_XML));
+	IndexXMLProcessor.writeFile(fos, ii.getInternal());
+	fos.close();
+    }
 
-	public static InvertedIndex loadFromGZipXml(String basename)
-			throws IOException {
-		InvertedIndex ii = new InvertedIndex();
-		InputStream fis = new GZIPInputStream(new FileInputStream(basename
-				+ SFX_XML));
-		Map<String, List<Occurrence>> a = IndexXMLProcessor.read(fis);
-		ii.setInternal(a);
-		return ii;
-	}
+    public static InvertedIndex loadFromGZipXml(String basename)
+	    throws IOException {
+	InvertedIndex ii = new InvertedIndex();
+	InputStream fis = new GZIPInputStream(new FileInputStream(basename
+		+ SFX_XML));
+	Map<String, List<Occurrence>> a = IndexXMLProcessor.read(fis);
+	ii.setInternal(a);
+	return ii;
+    }
 
-	public static InvertedIndex loadFromDump(String file)
-			throws FileNotFoundException {
-		return (InvertedIndex) Pickle.readObject(new File(file + SFX_DUMP));
-	}
+    public static InvertedIndex loadFromDump(String file)
+	    throws FileNotFoundException {
+	return (InvertedIndex) Pickle.readObject(new File(file + SFX_DUMP));
+    }
 
-	public static void storeToDump(String file, InvertedIndex ii)
-			throws IOException {
-		Pickle.saveObject(new File(file + SFX_DUMP), ii);
-	}
+    public static void storeToDump(String file, InvertedIndex ii)
+	    throws IOException {
+	Pickle.saveObject(new File(file + SFX_DUMP), ii);
+    }
 
-	public static InvertedIndex loadFromDumpGZip(String file)
-			throws FileNotFoundException, IOException {
-		return (InvertedIndex) Pickle.readObject(new GZIPInputStream(
-				new FileInputStream(file + SFX_DUMP_GZIP)));
-	}
+    public static InvertedIndex loadFromDumpGZip(String file)
+	    throws FileNotFoundException, IOException {
+	return (InvertedIndex) Pickle.readObject(new GZIPInputStream(
+		new FileInputStream(file + SFX_DUMP_GZIP)));
+    }
 
-	public static void storeToDumpGZip(String file, InvertedIndex ii)
-			throws IOException {
-		Pickle.saveObject(new GZIPOutputStream(new FileOutputStream(file
-				+ SFX_DUMP_GZIP)), ii);
+    public static void storeToDumpGZip(String file, InvertedIndex ii)
+	    throws IOException {
+	Pickle.saveObject(new GZIPOutputStream(new FileOutputStream(file
+		+ SFX_DUMP_GZIP)), ii);
+    }
+
+    public static InvertedIndex loadFrom(File indexFile) throws IOException {
+	String end = indexFile.getAbsoluteFile().getName();
+	String sfx = end.substring(end.indexOf('.'));
+	String name = end.substring(0,end.indexOf('.'));
+
+	switch (sfx) {
+	case SFX_DUMP:
+	    return loadFromDump(name);
+	case SFX_DUMP_GZIP:
+	    return loadFromDumpGZip(name);
+	case SFX_XML:
+	    return loadFromXml(name);
+	case SFX_XML_GZIP:// default
+	    return loadFromGZipXml(name);
 	}
+	return loadFromGZipXml(name);
+    }
+
+    public static void storeTo(File indexFile, InvertedIndex ii) throws FileNotFoundException, IOException {
+	String end = indexFile.getAbsoluteFile().getName();
+	String sfx = end.substring(end.indexOf('.'));
+	String name = end.substring(0,end.indexOf('.'));
+
+	switch (sfx) {
+	case SFX_DUMP:
+	    storeToDump(name, ii);
+	    break;
+	case SFX_DUMP_GZIP:
+	    storeToDumpGZip(name, ii);
+	    break;
+	case SFX_XML:
+	    storeToXml(name, ii);
+	    break;
+	case SFX_XML_GZIP:// default
+	    storeToGZipXml(name, ii);
+	}
+	storeToGZipXml(name, ii);
+    }
 
 }

@@ -43,11 +43,11 @@ public class InvertedIndex implements Searchable, Serializable, IIndex {
 		List<Occurrence> list = index.get(word);
 
 		SearchResult sr = new SearchResult();
-		if (list.isEmpty())
+		if (list == null || list.isEmpty())
 			return sr;
 
 		for (Occurrence occurrence : list) {
-			sr.add(occurrence);
+			sr.add(occurrence, word);
 		}
 		return sr;
 	}

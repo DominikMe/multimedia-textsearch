@@ -13,8 +13,11 @@ public class SpeechRec {
  
 	public static void main(String[] args) throws Exception {
  
+		String language = "de-de";
+		if(args.length > 1)
+			language = args[1];
 		String url = "http://www.google.com/speech-api/v1/recognize?" +
-		"xjerr=1&client=G&lang=de-DE&maxresults=2";
+		"xjerr=1&client=G&lang="+language+"&maxresults=2";
 		
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();

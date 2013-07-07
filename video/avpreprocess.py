@@ -130,8 +130,8 @@ def gather_files(target_folder, filter="*.png", deltaT=5):
     return files
 
 
-def speech_to_text(audio_file):
-    fin = os.popen("java SpeechRec %s" % audio_file)
+def speech_to_text(audio_file, lang="en-us"):
+    fin = os.popen("java SpeechRec %s %s" % (audio_file,lang))
     data = fin.read()
     fin.close()
     print data

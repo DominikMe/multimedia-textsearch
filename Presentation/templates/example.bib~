@@ -1,0 +1,7 @@
+@INPROCEEDINGS{Federico99efficientlanguage,
+    author = {Marcello Federico},
+    title = {Efficient Language Model Adaptation Through MDI Estimation},
+    booktitle = {In Proc. of EUROSPEECH},
+    year = {1999},
+    pages = {1583--1586}
+}

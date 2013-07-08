@@ -9,8 +9,10 @@ import edu.kit.iti.algo2.textindexing.gui.MainWindow;
 public class MainWindowStart {
 
     public static void main(String[] args) throws IOException {
-	File index = new File("test-index.dump.gzip");
-	File repo = new File("test-repo");
+//	File index = new File("test-index.dump.gzip");
+//	File repo = new File("test-repo");
+	File index = new File("Indexer/built_indexes/audio-index.xml.gzip");
+	File repo = new File("Indexer/audio-repo");
 	DocumentRepository.init(repo);
 	new MainWindow(index).setVisible(true);
     }

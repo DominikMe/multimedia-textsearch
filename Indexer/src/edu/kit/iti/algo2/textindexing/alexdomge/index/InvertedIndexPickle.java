@@ -21,34 +21,34 @@ public class InvertedIndexPickle {
     public static final String SFX_DUMP = ".dump";
     public static final String SFX_DUMP_GZIP = ".dump.gzip";
 
-    public static void storeToXml(String basename, InvertedIndex ii)
+    public static void storeToXml(String filepath, InvertedIndex ii)
 	    throws FileNotFoundException {
-	FileOutputStream fos = new FileOutputStream(basename + SFX_XML);
+	FileOutputStream fos = new FileOutputStream(filepath + SFX_XML);
 	IndexXMLProcessor.writeFile(fos, ii.getInternal());
     }
 
-    public static InvertedIndex loadFromXml(String basename)
+    public static InvertedIndex loadFromXml(String filepath)
 	    throws FileNotFoundException {
 	InvertedIndex ii = new InvertedIndex();
-	InputStream fis = new FileInputStream(basename + SFX_XML);
+	InputStream fis = new FileInputStream(filepath + SFX_XML);
 	Map<String, List<Occurrence>> a = IndexXMLProcessor.read(fis);
 	ii.setInternal(a);
 	return ii;
     }
 
-    public static void storeToGZipXml(String basename, InvertedIndex ii)
+    public static void storeToGZipXml(String filepath, InvertedIndex ii)
 	    throws FileNotFoundException, IOException {
 	GZIPOutputStream fos = new GZIPOutputStream(new FileOutputStream(
-		basename + SFX_XML));
+		filepath + SFX_XML_GZIP));
 	IndexXMLProcessor.writeFile(fos, ii.getInternal());
 	fos.close();
     }
 
-    public static InvertedIndex loadFromGZipXml(String basename)
+    public static InvertedIndex loadFromGZipXml(String filepath)
 	    throws IOException {
 	InvertedIndex ii = new InvertedIndex();
-	InputStream fis = new GZIPInputStream(new FileInputStream(basename
-		+ SFX_XML));
+	InputStream fis = new GZIPInputStream(new FileInputStream(filepath
+		+ SFX_XML_GZIP));
 	Map<String, List<Occurrence>> a = IndexXMLProcessor.read(fis);
 	ii.setInternal(a);
 	return ii;
@@ -80,39 +80,41 @@ public class InvertedIndexPickle {
 	String end = indexFile.getAbsoluteFile().getName();
 	String sfx = end.substring(end.indexOf('.'));
 	String name = end.substring(0,end.indexOf('.'));
+	String path = indexFile.getParent() + File.separator + name;
 
 	switch (sfx) {
 	case SFX_DUMP:
-	    return loadFromDump(name);
+	    return loadFromDump(path);
 	case SFX_DUMP_GZIP:
-	    return loadFromDumpGZip(name);
+	    return loadFromDumpGZip(path);
 	case SFX_XML:
-	    return loadFromXml(name);
+	    return loadFromXml(path);
 	case SFX_XML_GZIP:// default
-	    return loadFromGZipXml(name);
+	    return loadFromGZipXml(path);
 	}
-	return loadFromGZipXml(name);
+	return loadFromGZipXml(path);
     }
 
     public static void storeTo(File indexFile, InvertedIndex ii) throws FileNotFoundException, IOException {
-	String end = indexFile.getAbsoluteFile().getName();
+    String end = indexFile.getAbsoluteFile().getName();
 	String sfx = end.substring(end.indexOf('.'));
 	String name = end.substring(0,end.indexOf('.'));
+	String path = indexFile.getParent() + File.separatorChar + name;
 
 	switch (sfx) {
 	case SFX_DUMP:
-	    storeToDump(name, ii);
+	    storeToDump(path, ii);
 	    break;
 	case SFX_DUMP_GZIP:
-	    storeToDumpGZip(name, ii);
+	    storeToDumpGZip(path, ii);
 	    break;
 	case SFX_XML:
-	    storeToXml(name, ii);
+	    storeToXml(path, ii);
 	    break;
 	case SFX_XML_GZIP:// default
-	    storeToGZipXml(name, ii);
+	    storeToGZipXml(path, ii);
 	}
-	storeToGZipXml(name, ii);
+	storeToGZipXml(path, ii);
     }
 
 }

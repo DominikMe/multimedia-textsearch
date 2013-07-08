@@ -134,9 +134,14 @@ def speech_to_text(audio_file, lang="en-us"):
     fin = os.popen("java SpeechRec %s %s" % (audio_file,lang))
     data = fin.read()
     fin.close()
+    if not data:
+        return ""
     print data
     jsdata = json.loads(data)
-    return jsdata["hypotheses"][0]["utterance"]
+    if jsdata["hypotheses"]:
+        return jsdata["hypotheses"][0]["utterance"]
+    else:
+        return ""
 
 
 def ocr_image(image, lang="deu", psm=1):
@@ -197,7 +202,7 @@ def main(inputfile, video=True, audio=True,
 
     adocs = vdocs = []
     if audio:
-        extract_audio(inputfile, newAudioDir, deltaT)
+        #extract_audio(inputfile, newAudioDir, deltaT)
         audios = gather_files(newAudioDir, "*flac", deltaT)
         adocs = map(sr, audios)
 

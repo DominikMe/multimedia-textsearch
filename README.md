@@ -22,7 +22,7 @@ format. The inverted index is generated upon these timed document.
 	* [Apache Commons Lang](http://commons.apache.org/proper/commons-lang/)
 	* [JavaTuples](http://javatuples.org)
 	* [jdom](http://jdom.org)
-
+	* [json-simple](http://code.google.com/p/json-simple/)
 
 *External Dependencies:*
 	* working [tesseract](http://code.google.com/p/tesseract-ocr/) installation (for win32 binaries are included)

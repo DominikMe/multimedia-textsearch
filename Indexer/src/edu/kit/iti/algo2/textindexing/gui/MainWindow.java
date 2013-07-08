@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -15,12 +16,14 @@ import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 
 import edu.kit.iti.algo2.textindexing.TimeSlot;
 import edu.kit.iti.algo2.textindexing.alexdomge.index.InvertedIndex;
@@ -82,7 +85,12 @@ public class MainWindow extends JFrame {
 	txtSearch = new JTextField(25);
 	lblSearch.setLabelFor(txtSearch);
 
+	actSearch.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("ENTER"));
 	JButton btn = new JButton(actSearch);
+	btn.getActionMap().put("search", actSearch);
+	btn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+	        (KeyStroke) actSearch.getValue(Action.ACCELERATOR_KEY), "search");
+	
 	box.add(lblSearch);
 	box.add(txtSearch);
 	box.add(btn);

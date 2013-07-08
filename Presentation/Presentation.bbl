@@ -1,0 +1,40 @@
+% $ biblatex auxiliary file $
+% $ biblatex version 1.7 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated as
+% required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\entry{test}{inproceedings}{}
+  \name{author}{1}{}{%
+    {{}%
+     {Federico}{F.}%
+     {Marcello}{M.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{FM1}
+  \strng{fullhash}{FM1}
+  \field{labelyear}{1999}
+  \field{sortinit}{F}
+  \field{booktitle}{In Proc. of EUROSPEECH}
+  \field{pages}{1583\bibrangedash 1586}
+  \field{title}{Efficient Language Model Adaptation Through MDI Estimation}
+  \field{year}{1999}
+\endentry
+
+\lossort
+\endlossort
+
+\endinput

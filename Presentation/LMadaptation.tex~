@@ -1,0 +1,378 @@
+%% TODO:
+%% adjust consistent style, variable name
+%% remove the most colons (not necessary)
+
+%% LaTeX-Beamer template for KIT design
+%% by Erik Burger, Christian Hammer
+%% title picture by Klaus Krogmann
+%%
+%% version 2.1
+%%
+%% mostly compatible to KIT corporate design v2.0
+%% http://intranet.kit.edu/gestaltungsrichtlinien.php
+%%
+%% Problems, bugs and comments to
+%% burger@kit.edu
+
+\documentclass[18pt]{beamer}
+
+%% SLIDE FORMAT
+
+% use 'beamerthemekit' for standard 4:3 ratio
+% for widescreen slides (16:9), use 'beamerthemekitwide'
+
+\usepackage{templates/beamerthemekit}
+% \usepackage{templates/beamerthemekitwide}
+\usepackage[utf8]{inputenc}
+%% TITLE PICTURE
+
+% if a custom picture is to be used on the title page, copy it into the 'logos'
+% directory, in the line below, replace 'mypicture' with the 
+% filename (without extension) and uncomment the following line
+% (picture proportions: 63 : 20 for standard, 169 : 40 for wide
+% *.eps format if you use latex+dvips+ps2pdf, 
+% *.jpg/*.png/*.pdf if you use pdflatex)
+
+%\titleimage{mypicture}
+
+%% TITLE LOGO
+
+% for a custom logo on the front page, copy your file into the 'logos'
+% directory, insert the filename in the line below and uncomment it
+
+%\titlelogo{mylogo}
+
+% (*.eps format if you use latex+dvips+ps2pdf,
+% *.jpg/*.png/*.pdf if you use pdflatex)
+
+%% TikZ INTEGRATION
+
+% use these packages for PCM symbols and UML classes
+% \usepackage{templates/tikzkit}
+% \usepackage{templates/tikzuml}
+
+% the presentation starts here
+
+\title[Topic Adaptation]{Topic Adaptation for Lechture Translation\\ through Bilingual Latent Semantic Models}
+\subtitle{}
+\author{Ge Wu}
+
+\institute{Institute for Anthropomatics}
+
+% Bibliography
+
+\usepackage[citestyle=authoryear,bibstyle=numeric,hyperref]{biblatex}
+ 
+\addbibresource{templates/example.bib}
+\bibhang1em
+
+\begin{document}
+
+% change the following line to "ngerman" for German style date and logos
+\selectlanguage{english}
+
+%title page
+\begin{frame}
+\titlepage
+\end{frame}
+
+%table of contents
+\begin{frame}{Outline}
+\tableofcontents
+\end{frame}
+
+\section{Introduction}
+\nocite{ruiz-federico:2011:WMT}
+
+\begin{frame}{Introduction}
+\begin{itemize}[<+->]
+\item Approach to language model adaptation with bilingual parallel traing texts
+\item Integration of 
+\begin{itemize}
+\item \textbf{P}robabilistic \textbf{L}atent \textbf{S}emantic \textbf{A}nalysis
+\item \textbf{M}inimum \textbf{D}iscrimination \textbf{I}nformation Adaptation
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Previous Work}
+\subsection{Topic Modeling with {\bf PLSA}}
+
+\begin{frame}{Probabilistic Latent Semantic Analysis}
+\begin{itemize}[<+->]
+\item Find out \textbf{topics} from a document collection
+\item If we have $\mathbf{K}$ topics
+$$P(term|doc) = \sum^{K}_{k=1} P(term|topic_k) \cdot P(topic_k|doc)$$
+\item \textbf{Overall probability} of the entire document collection
+$$P(Collection) = \prod^D_{d=1}\prod^T_{t=1} \mathbf{P(term_t|doc_d)}^{Count(term_t, doc_d)}$$
+$$\log{P(C)} = \sum^D_{d=1}\sum^T_{t=1} Count(t, d) \cdot \log{\sum^{K}_{k=1} P(t|k) \cdot P(k|d)}$$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Probabilistic Latent Semantic Analysis}
+\begin{itemize}[<+->]
+\item We have
+\begin{itemize}
+\item term by document matrix: $\mathbf{Count(term, doc)}$
+\end{itemize}
+\item We want to
+\begin{itemize}
+\item find term-topic distribution: $\mathbf{P(term|topic)}$
+\item find topic-document distribution: $\mathbf{P(topic|doc)}$
+\item $\sum_{term \in V}P(term|topic)=\sum_{topic \in Topics}P(topic|doc)=1$
+\item \textcolor{red}{maximize} overall document collection probability:
+$$\log{P(C)} = \sum^D_{d=1}\sum^T_{t=1} Count(t, d) \cdot \log{\sum^{K}_{k=1} \mathbf{P(t|k)} \cdot \mathbf{P(k|d)}}$$
+\end{itemize}
+\item \textbf{EM Algorithm}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Example [\cite{folien}]}
+\begin{figure}
+\centering
+\includegraphics[scale=0.6]{example.png}
+\caption{Topics found from a Science Magazine papers collection}
+\end{figure}
+\end{frame}
+
+\subsection{Language Model Adaptation with {\bf MDI Adaptation}}
+\begin{frame}{MDI Adaptation}
+\begin{itemize}[<+->]
+\item Adapt background language model to fit \textbf{constraints on its marginal distributions}
+\item Constraints are extracted from adaptation texts
+\item Adaptation based on \textbf{Minimum Discrimination Information}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{MDI Adaptation}
+\begin{itemize}[<+->]
+\item We have
+\begin{itemize}
+\item \textbf{constraints $\mathbf{\hat{P}_A}$}, empirical estimates of the features on adaptation texts
+\item \textbf{background LM probability $\mathbf{P_B}$}
+\end{itemize}
+\item We want to
+\begin{itemize}
+\item calculate \textbf{adapted probability $\mathbf{P_A}$}
+\item it should fit constraints on its marginal distributions:
+$$\sum_{hw \in V^n} P_A(h, w) \cdot \delta_{\hat{w}}(hw) = \hat{P}_A(\hat{w})\hspace{0.5cm}\forall \hat{w} \in V$$
+\item \textcolor{red}{minimize} Kullback-Leibler distance from $P_A$ to $P_B$:
+$$P_A(\cdot) = \arg \min_{Q(\cdot)} \sum_{hw \in V^n} Q(h, w) \cdot \log \frac{Q(h, w)}{P_B(h, w)}$$
+\end{itemize}
+\item \textbf{G}eneralized \textbf{I}terative \textbf{S}caling algorithm
+\end{itemize}
+\end{frame}
+
+\begin{frame}{MDI Adaptation}
+\begin{columns}[c]
+    \begin{column}{.6\textwidth}
+	\begin{figure}
+	\raggedright
+	\includegraphics[scale=0.26]{mdi.png}
+	\end{figure}
+	\end{column}
+	\begin{column}{.35\textwidth}
+	\centerline{Figure:} \\LM adaptation through MDI and result in closed form [\cite{Federico99efficientlanguage}]
+	\end{column}
+\end{columns}
+\end{frame}
+
+\section{{\bf Bilingual Latent Semantic Models}}
+
+\begin{frame}{Bilingual Latent Semantic Models}
+\begin{itemize}[<+->]
+\item LM adaptation with bilingual parallel training texts
+\item \textbf{Same-Topic-Distribution Assumption}: \\ 
+Topics in a parallel text share the same semantic meanings across languages
+\item training Term-Topic distribution $P(w|t)$ with PLSA
+\item Topic-Document distribution {\boldmath$\hat{\theta}$} for new untranslated document $\mathbf{d'}$ can be inferred by \textcolor{red}{maximizing}:
+$$\hat{\theta} = \arg \max_\theta \sum_w Count(w, d') \cdot \log \sum_t P(w|t) \cdot \theta_{t, d'}$$
+using \textbf{EM algorithm}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Procedures}
+\begin{itemize}[<+->]
+\item Combine parallel training texts into document-pair $(E, F)$
+\item Calculate Term-Topic distribution $\mathbf{P(w|t)}$ with PLSA ($w \in V_E \cup V_F$)
+\item Split untranslated text $\hat{E}$ into documents $D$, infer Topic-Document distribution {\boldmath$\hat{\theta}$} for $d \in D$
+\item Calculate \textbf{Word-Document Distrbution} for $d \in D$:
+$$P(w|d) = \sum_{t \in Topics}{P(w|t)\cdot \hat{\theta}_{t, d}}$$
+\item Convert Word-Document Distribution into \textbf{Pseudo-Counts}:
+$$n(w|d) = \frac{P(w|d)}{max_{w'}P(w'|d)}\cdot\Delta$$
+\item Remove source words and build LM through MDI adaptation
+\end{itemize}
+\end{frame}
+
+\section{Experiments}
+
+\begin{frame}{Experimental Data}
+\begin{itemize}[<+->]
+\item French/English training data from TED Talks collection, used in IWSLT 2010 evaluation task \\
+\hfill $\mathbf{329}$ parallel transcripts with $\mathbf{84k}$ sentences \\
+\hfill segmented into clauses \\
+\item Test data \\
+\hfill $\mathbf{758}$ sentences with $\mathbf{27432}$ English/ $\mathbf{27307}$ French words \\
+\hfill created via $1$-best ASR outputs from KIT Quaero System \\
+\item $5$-Background LM \\
+\hfill trained with French side TED training data ($\mathbf{740k}$ words) \\
+\hfill improved Kneser-Ney smoothing \\
+\hfill computed with IRSTLM toolkit \\
+%\hfill weights of log-linear interpolation model were optimized via minimum error rate training (MERT) \\
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Samples [\cite{ruiz-federico:2011:WMT}]}
+\begin{figure}
+\centering
+\small
+\begin{tabular}{p{10cm}}
+\hline
+robert lang is a pioneer of the newest kind of origami -- using
+math and engineering principles to fold mind-blowingly
+intricate designs that are beautiful and , sometimes , very
+useful . my talk is `` flapping birds and space telescopes .
+'' and you would think that should have nothing to do with
+one another , but i hope by the end of these 18 minutes
+, you ’ll see a little bit of a relation . \textcolor{blue}{robert lang est un pionnier des nouvelles techniques d’ origami - basées sur des principes mathématiques et d’ ingénierie permettant de
+créer des modèles complexes et époustouflants , qui sont
+beaux et parfois , très utiles . ma conférence s’ intitule ``
+oiseaux en papier et télescopes spatiaux '' . et vous pensez
+probablement que les uns et les autres n’ ont rien en commun
+, mais j’ espère qu’ à l’ issue de ces 18 minutes , vous
+comprendrez ce qui les relie .} \\
+\hline
+\end{tabular}
+\caption{A sample bilingual document used for training}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Samples [\cite{ruiz-federico:2011:WMT}]}
+\begin{figure}
+\centering
+\small
+\begin{tabular}{p{10cm}}
+\hline
+we didn ’t have money , so we had a cheap , little ad , but we
+wanted college students for a study of prison life . 75 people
+volunteered , took personality tests . we did interviews .
+picked two dozen : the most normal , the most healthy . \\
+\hline
+\end{tabular}
+\caption{A sample English-only document used for PLSA inference}
+\end{figure}
+\end{frame}
+
+\begin{frame}{fs}
+\begin{figure}
+\centering
+\small
+\begin{tabular}{rlrrr}
+\hline \hline
+$Rank $&$ Word $&$ PA(w) $&$ PB(w) $&$ PA(w)/PB(w) $\\
+\hline
+$20 $&$gens $&$8.41E-03 $&$4.55E-05 $&$184.84 $\\
+$22 $&$vie $&$8.30E-03 $&$1.09E-04 $&$76.15 $\\
+$51 $&$prix $&$2.59E-03 $&$8.70E-05 $&$29.77 $\\
+$80 $&$école $&$1.70E-03 $&$6.13E-05 $&$27.73 $\\
+$83 $&$argent $&$1.60E-03 $&$3.96E-05 $&$40.04 $\\
+$86 $&$personnes $&$1.52E-03 $&$2.75E-04 $&$5.23 $\\
+$94 $&$aide $&$1.27E-03 $&$7.71E-05 $&$16.47 $\\
+$98 $&$étudiants $&$1.20E-03 $&$7.12E-05 $&$16.85 $\\
+$119 $&$marché $&$9.22E-04 $&$9.10E-05 $&$10.13 $\\
+$133 $&$étude $&$7.63E-04 $&$4.55E-05 $&$16.77 $\\
+$173 $&$éducation $&$5.04E-04 $&$2.97E-05 $&$16.97 $\\
+$315 $&$prison $&$2.65E-04 $&$1.98E-05 $&$13.38 $\\
+$323 $&$université $&$2.60E-04 $&$2.97E-05 $&$8.75 $\\
+\hline
+\end{tabular}
+\caption{Sample unigram probabilities of the adaptation
+model for document $\#230$, compared to the baseline unigram
+probabilities}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{General Results}
+\begin{table}
+\centering
+\small
+\begin{tabular}{lrrr}
+\hline \hline
+LM                & Perplexity & BLEU (\%) & NIST \\
+\hline
+Adapt TED		  & $162.44$ & $\mathbf{28.49}$ & $\mathbf{6.5956}$ \\
+Base TED		  & $191.76$ & $27.64$ & $6.4405$ \\
+\hline
+Improvement $\approx$ & $15\%$ & $3\%$ & $2.4\%$ \\
+\hline
+\end{tabular}
+\caption{Improvement of Perpexity, BLEU and NIST scores}
+\end{table}
+\begin{table}
+\centering
+\small
+\begin{tabular}{lrrr}
+\hline \hline
+NIST                & $1$-gram & $2$-gram & $3$-gram \\
+\hline
+Adapt TED & $4.8077$ & $1.3925$ & $0.3229$ \\
+Base TED & $4.6980$ & $1.3527$ & $0.3173$ \\
+\hline
+Difference & $0.1097$ & $0.0398$ & $0.0056$ \\
+\hline
+\end{tabular}
+\caption{Individual unigram NIST scores for $n$-gramms ($1$-$3$)}
+\end{table}
+\end{frame}
+
+\begin{frame}{Fluency \& Adequacy Improvements}
+\begin{itemize}
+\item Grammar
+\item Word Choice
+\item ...
+\end{itemize}
+\begin{figure}
+\centering
+\small
+\begin{tabular}{ll}
+\hline
+\textbf{B} & , j’ ai eu la chance de travailler dans les installations , rehab \\
+\textbf{A} & j’ ai eu la chance de travailler dans les rehab installation , \\
+\textbf{\textcolor{blue}{R}} & \textcolor{blue}{j’ ai la chance de travailler dans un centre de désintoxication ,} \\
+\hline
+\textbf{B} & d’ origine , les idées qui ont de la valeur -- \\
+\textbf{A} & d’ avoir des idées originales qui ont de la valeur -- \\
+\textbf{\textcolor{blue}{R}} & \textcolor{blue}{d’ avoir des idées originales qui ont de la valeur --} \\
+\hline
+\textbf{B} & un nom qui appartient à quelque chose d’ autre , le soleil . \\
+\textbf{A} & un nom qui appartient à autre chose , le soleil . \\
+\textbf{\textcolor{blue}{R}} & \textcolor{blue}{le nom d’ une autre chose , le soleil .} \\
+\hline
+\end{tabular}
+\end{figure}
+\end{frame}
+
+\section{Conclusions}
+
+\begin{frame}{Conclusions}
+\begin{itemize}[<+->]
+\item Integration of PLSA and MDI to adapt background LM
+\item Similar topic distribution assumption in parallel texts
+%\item No removal of stop words and punctuation
+\item Improvements in Perplexity, BLEU and NIST scores
+\item Difficulty in computation of normalization term $z(h)$
+\end{itemize}
+\end{frame}
+
+\appendix
+\beginbackup
+
+\begin{frame}[allowframebreaks]{References}
+\printbibliography
+\end{frame}
+
+\backupend
+
+\end{document}

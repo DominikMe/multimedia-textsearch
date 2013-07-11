@@ -1,10 +1,10 @@
 package edu.kit.iti.algo2.textindexing.searchengine.expr;
 
-
 public class LispSyntaxParser {
 	private static final char LPAREN = '(';
 	private static final char RPAREN = ')';
 	private static final char WORD = '\'';
+	private static final String WORD_BEGIN = "[a-zA-Z0-9]";
 
 	int pos = -1;
 	private String input;
@@ -13,7 +13,7 @@ public class LispSyntaxParser {
 	public LispSyntaxParser(String query) {
 		input = query.trim();
 		consume();
-		if (!match(LPAREN) && !match(WORD)) {
+		if (!match(LPAREN) && !("" + current).matches(WORD_BEGIN)) {
 			throw new IllegalArgumentException(
 					"query should start with LPAREN or WORD");
 		}
@@ -31,7 +31,7 @@ public class LispSyntaxParser {
 				return parseParenLeft();
 			}
 
-			if (match(WORD)) {
+			if (("" + current).matches(WORD_BEGIN)) {
 				return parseWord();
 			}
 			consume();
@@ -40,11 +40,12 @@ public class LispSyntaxParser {
 	}
 
 	private Expr parseWord() {
-		if (!match(WORD))
-			throw new IllegalStateException("expected: WORD (" + WORD
-					+ ") got:" + current);
-		consume();
-		String w = consumeUntil(WORD);
+		/*
+		 * if (!match(WORD)) throw new IllegalStateException("expected: WORD ("
+		 * + WORD + ") got:" + current);
+		 */
+		// consume();
+		String w = consumeUntil(' ', ')');
 
 		if (w.contains("*")) {
 			return new FuzzyWordExpr(w);
@@ -69,10 +70,12 @@ public class LispSyntaxParser {
 		return me;
 	}
 
-	private String consumeUntil(char c) {
-		int p = input.indexOf(c, pos);
-		String s = input.substring(pos, p);
-		pos = p;
+	private String consumeUntil(char... c) {
+		int p = pos;
+		while(!(new String(c).contains("" + current)) && pos < input.length()) {
+			consume();
+		}
+		String s = input.substring(p, pos);
 		consume();
 		return s;
 	}

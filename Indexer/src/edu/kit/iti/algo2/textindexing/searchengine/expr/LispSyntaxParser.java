@@ -4,7 +4,7 @@ public class LispSyntaxParser {
 	private static final char LPAREN = '(';
 	private static final char RPAREN = ')';
 	private static final char WORD = '\'';
-	private static final String WORD_BEGIN = "[a-zA-Z0-9]";
+	private static final String WORD_BEGIN = "[a-zA-Z0-9*?]";
 
 	int pos = -1;
 	private String input;
@@ -47,7 +47,7 @@ public class LispSyntaxParser {
 		// consume();
 		String w = consumeUntil(' ', ')');
 
-		if (w.contains("*")) {
+		if (w.contains("*") || w.contains("?")) {
 			return new FuzzyWordExpr(w);
 		} else {
 			return new StrictWordExpr(w);

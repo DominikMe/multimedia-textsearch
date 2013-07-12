@@ -15,6 +15,10 @@ import edu.kit.iti.algo2.textindexing.alexdomge.index.Occurrence;
 public class SearchResult {
     public Set<SearchResultEntry> result = new TreeSet<>();
 
+    public boolean isEmpty() {
+    	return result.isEmpty();
+    }
+    
     public void add(Occurrence occurrence, String... word) {
 	result.add(new SearchResultEntry(occurrence, word));
     }

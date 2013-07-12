@@ -41,8 +41,8 @@ public class SearchResultEntryRenderer extends DefaultListCellRenderer {
 	comp.add(north, BorderLayout.NORTH);
 	comp.add(preview);
 
-	preview.setPreferredSize(new Dimension(0, 200));
-	preview.setSize(new Dimension(0, 200));
+	preview.setPreferredSize(new Dimension(0, 100));
+	preview.setSize(new Dimension(0, 100));
     }
 
     @Override

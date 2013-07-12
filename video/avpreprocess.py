@@ -103,7 +103,7 @@ def extract_audio(input_video, target_folder, deltaT):
     pool = Pool(4)
 
     for t in range(0, length, deltaT):
-        p = {'src': input_video, 'out': target_folder + "/" + str(t / deltaT), 'start': t, 'duration': deltaT}
+        p = {'src': input_video, 'out': target_folder + "/" + str((t / deltaT) + 1), 'start': t, 'duration': deltaT}
         s = COMMAND_EXTRACT_AUDIO.substitute(p)
         execute_with_log(s)
         #pool.apply_async(os.system, s)
@@ -202,7 +202,7 @@ def main(inputfile, video=True, audio=True,
 
     adocs = vdocs = []
     if audio:
-        #extract_audio(inputfile, newAudioDir, deltaT)
+        extract_audio(inputfile, newAudioDir, deltaT)
         audios = gather_files(newAudioDir, "*flac", deltaT)
         adocs = map(sr, audios)
 

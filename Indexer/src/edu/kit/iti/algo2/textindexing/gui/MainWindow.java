@@ -37,6 +37,7 @@ import edu.kit.iti.algo2.textindexing.searchengine.expr.LispSyntaxParser;
 
 public class MainWindow extends JFrame {
     private static final long serialVersionUID = 1L;
+	private static final String START_SEARCH = "computer";
     private JTextField txtSearch;
     private JList<SearchResultEntry> resultList = new JList<>();
     private JLabel lblStatus = new JLabel("Loading ...");
@@ -54,7 +55,7 @@ public class MainWindow extends JFrame {
 	status("Index " + indexFile.getAbsolutePath() + " loaded");
 
 	// debugging
-	txtSearch.setText("'dient'");
+	txtSearch.setText(START_SEARCH);
 	actSearch.actionPerformed(null);
 
     }

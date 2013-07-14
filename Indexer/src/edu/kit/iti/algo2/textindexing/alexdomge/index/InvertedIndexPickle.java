@@ -80,8 +80,9 @@ public class InvertedIndexPickle {
 	String end = indexFile.getAbsoluteFile().getName();
 	String sfx = end.substring(end.indexOf('.'));
 	String name = end.substring(0,end.indexOf('.'));
-//	String path = indexFile.getParent() + File.separator + name;
 	String path = name;
+	if(indexFile.getParent() != null)
+		path = indexFile.getParent() + File.separator + name;
 
 	switch (sfx) {
 	case SFX_DUMP:
@@ -100,11 +101,10 @@ public class InvertedIndexPickle {
 	String end = indexFile.getAbsoluteFile().getName();
 	String sfx = end.substring(end.indexOf('.'));
 	String name = end.substring(0,end.indexOf('.'));
-	//caused error if indexFile.getParent() == null
-	//String path = indexFile.getParent() + File.separatorChar + name;
-	
 	String path = name;
-
+	if(indexFile.getParent() != null)
+		path = indexFile.getParent() + File.separator + name;
+	
 	switch (sfx) {
 	case SFX_DUMP:
 	    storeToDump(path, ii);
